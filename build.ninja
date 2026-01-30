@@ -1,0 +1,73 @@
+builddir = vision/binaries
+build $
+    $builddir/libcamera_message_framework.so.objs/lib/camera_message_framework_c.o: $
+    cxx vision/lib/camera_message_framework_c.cpp || $
+    link-stage/libauvlog.so link-stage/libfmt.so
+  cflags = $cflags -Ivision/ -Ilib -fPIC
+build $
+    $builddir/libcamera_message_framework.so.objs/lib/camera_message_framework.o: $
+    cxx vision/lib/camera_message_framework.cpp || link-stage/libauvlog.so $
+    link-stage/libfmt.so
+  cflags = $cflags -Ivision/ -Ilib -fPIC
+build $builddir/libcamera_message_framework.so.objs/lib/filelock.o: cxx $
+    vision/lib/filelock.cpp || link-stage/libauvlog.so link-stage/libfmt.so
+  cflags = $cflags -Ivision/ -Ilib -fPIC
+build $builddir/libcamera_message_framework.so: link_shared $
+    $builddir/libcamera_message_framework.so.objs/lib/camera_message_framework_c.o $
+    $builddir/libcamera_message_framework.so.objs/lib/camera_message_framework.o $
+    $builddir/libcamera_message_framework.so.objs/lib/filelock.o | $
+    link-stage/libauvlog.so link-stage/libfmt.so
+  libs = -lauvlog -lfmt
+  ldflags = $ldflags 
+build libcamera_message_framework.so: phony $
+    link-stage/libcamera_message_framework.so
+build link-stage/libcamera_message_framework.so: install $
+    $builddir/libcamera_message_framework.so
+build $builddir/libcapture_source.so.objs/lib/capture_source.o: cxx $
+    vision/lib/capture_source.cpp || link-stage/libauvlog.so $
+    link-stage/libfmt.so link-stage/libcamera_message_framework.so
+  cflags = $cflags -Ivision/ -Ilib -fPIC
+build $builddir/libcapture_source.so: link_shared $
+    $builddir/libcapture_source.so.objs/lib/capture_source.o | $
+    link-stage/libauvlog.so link-stage/libfmt.so $
+    link-stage/libcamera_message_framework.so
+  libs = -lauvlog -lfmt -lcamera_message_framework
+  ldflags = $ldflags 
+build libcapture_source.so: phony link-stage/libcapture_source.so
+build link-stage/libcapture_source.so: install $builddir/libcapture_source.so
+build $
+    $builddir/libauv-color-balance.so.objs/utils/color_correction/color_balance.o: $
+    cxx vision/utils/color_correction/color_balance.cpp || link-stage/libutils.so
+  cflags = $cflags -fPIC `pkg-config --cflags opencv4`
+build $builddir/libauv-color-balance.so: link_shared $
+    $builddir/libauv-color-balance.so.objs/utils/color_correction/color_balance.o $
+    | link-stage/libutils.so
+  libs = -lutils
+  ldflags = $ldflags `pkg-config --libs opencv4`
+build libauv-color-balance.so: phony link-stage/libauv-color-balance.so
+build link-stage/libauv-color-balance.so: install $
+    $builddir/libauv-color-balance.so
+build auv-webcam-camera: phony link-stage/auv-webcam-camera
+build link-stage/auv-webcam-camera: install $
+    vision/capture_sources/generic_camera.py
+build auv-video-camera: phony link-stage/auv-video-camera
+build link-stage/auv-video-camera: install vision/capture_sources/video.py
+build auv-camera-stream-server: phony link-stage/auv-camera-stream-server
+build link-stage/auv-camera-stream-server: install $
+    vision/capture_sources/stream_server.py
+build auv-camera-stream-client: phony link-stage/auv-camera-stream-client
+build link-stage/auv-camera-stream-client: install $
+    vision/capture_sources/stream_client.py
+build auv-yolo-shm: phony link-stage/auv-yolo-shm
+build link-stage/auv-yolo-shm: install vision/misc/yolo_shm.py
+build auv-vision-runner: phony link-stage/auv-vision-runner
+build link-stage/auv-vision-runner: install vision/runner.sh
+build auv-vr: phony link-stage/auv-vr
+build link-stage/auv-vr: install vision/runner.sh
+build code-vision: phony | link-stage/libcamera_message_framework.so $
+    link-stage/libcapture_source.so link-stage/libauv-color-balance.so $
+    link-stage/auv-webcam-camera link-stage/auv-video-camera $
+    link-stage/auv-camera-stream-server link-stage/auv-camera-stream-client $
+    link-stage/auv-yolo-shm link-stage/auv-vision-runner link-stage/auv-vr
+build tests-vision: phony 
+build check-vision: phony 
